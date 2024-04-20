@@ -101,33 +101,39 @@ fun SportsApp(
         }
     }
 
-    Scaffold(
-        topBar = {
-            SportsAppBar(
-                isShowingListPage = uiState.isShowingListPage,
-                onBackButtonClick = { viewModel.navigateToListPage() },
+    if(contentType == SportsContentType.ListAndDetail){
+        Scaffold(
+            topBar = {
+                SportsAppBarDetail()
+            }
+        ) { innerPadding ->
+            SportsListAndDetails(
+                selectedSport = uiState.currentSport,
+                sports = uiState.sportsList,
+                onClick = {
+                    viewModel.updateCurrentSport(it)
+                    viewModel.navigateToDetailPage()
+                },
+                contentPadding = innerPadding,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        top = dimensionResource(R.dimen.padding_small),
+                        start = dimensionResource(R.dimen.padding_medium),
+                        end = dimensionResource(R.dimen.padding_medium),
+                    )
             )
         }
-    ) { innerPadding ->
-        if (uiState.isShowingListPage) {
-            if(contentType == SportsContentType.ListAndDetail){
-                SportsListAndDetails(
-                    selectedSport = uiState.currentSport,
-                    sports = uiState.sportsList,
-                    onClick = {
-                        viewModel.updateCurrentSport(it)
-                        viewModel.navigateToDetailPage()
-                    },
-                    contentPadding = innerPadding,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            top = dimensionResource(R.dimen.padding_medium),
-                            start = dimensionResource(R.dimen.padding_medium),
-                            end = dimensionResource(R.dimen.padding_medium),
-                        )
+    } else {
+        Scaffold(
+            topBar = {
+                SportsAppBar(
+                    isShowingListPage = uiState.isShowingListPage,
+                    onBackButtonClick = { viewModel.navigateToListPage() },
                 )
-            } else {
+            }
+        ) { innerPadding ->
+            if (uiState.isShowingListPage) {
                 SportsList(
                     sports = uiState.sportsList,
                     onClick = {
@@ -143,15 +149,15 @@ fun SportsApp(
                             end = dimensionResource(R.dimen.padding_medium),
                         )
                 )
+            } else {
+                SportsDetail(
+                    selectedSport = uiState.currentSport,
+                    contentPadding = innerPadding,
+                    onBackPressed = {
+                        viewModel.navigateToListPage()
+                    }
+                )
             }
-        } else {
-            SportsDetail(
-                selectedSport = uiState.currentSport,
-                contentPadding = innerPadding,
-                onBackPressed = {
-                    viewModel.navigateToListPage()
-                }
-            )
         }
     }
 }
@@ -188,6 +194,24 @@ fun SportsAppBar(
             }
         } else {
             { Box {} }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primary
+        ),
+        modifier = modifier,
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SportsAppBarDetail(
+    modifier: Modifier = Modifier
+){
+    TopAppBar(
+        title = {
+            Text(
+                text = stringResource(R.string.list_fragment_label)
+            )
         },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary
@@ -301,7 +325,7 @@ private fun SportsDetail(
     selectedSport: Sport,
     onBackPressed: () -> Unit,
     contentPadding: PaddingValues,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     BackHandler {
         onBackPressed()
@@ -395,7 +419,12 @@ private fun SportsListAndDetails(
         LazyColumn(
             contentPadding = contentPadding,
             verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_medium)),
-            modifier = modifier.weight(1f),
+            modifier = Modifier
+                .weight(1f)
+                .padding(
+                    end = dimensionResource(id = R.dimen.padding_small),
+                    top = dimensionResource(id = R.dimen.padding_small)
+                ),
         ) {
             items(sports, key = { sport -> sport.id }) { sport ->
                 SportsListItem(
@@ -408,11 +437,17 @@ private fun SportsListAndDetails(
         SportsDetail(
             selectedSport = selectedSport,
             contentPadding = contentPadding,
+            modifier = Modifier.weight(1f),
             onBackPressed = {
                 activity.finish()
-            }
+            },
         )
+
+
+
+
     }
+
 }
 
 @Preview
@@ -434,6 +469,21 @@ fun SportsListPreview() {
             SportsList(
                 sports = LocalSportsDataProvider.getSportsData(),
                 onClick = {},
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+fun SportsListAndDetailsPreview(){
+    SportsTheme {
+        Surface {
+            SportsListAndDetails(
+                selectedSport = LocalSportsDataProvider.defaultSport,
+                sports = LocalSportsDataProvider.getSportsData(),
+                onClick = {},
+                contentPadding = PaddingValues(0.dp),
             )
         }
     }
