@@ -118,9 +118,9 @@ fun SportsApp(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(
-                        top = dimensionResource(R.dimen.padding_small),
+                        top = dimensionResource(R.dimen.padding_0dp),
                         start = dimensionResource(R.dimen.padding_medium),
-                        end = dimensionResource(R.dimen.padding_medium),
+                        end = dimensionResource(R.dimen.padding_0dp),
                     )
             )
         }
@@ -422,8 +422,8 @@ private fun SportsListAndDetails(
             modifier = Modifier
                 .weight(1f)
                 .padding(
-                    end = dimensionResource(id = R.dimen.padding_small),
-                    top = dimensionResource(id = R.dimen.padding_small)
+                    end = dimensionResource(id = R.dimen.padding_medium),
+                    top = dimensionResource(id = R.dimen.padding_medium)
                 ),
         ) {
             items(sports, key = { sport -> sport.id }) { sport ->
